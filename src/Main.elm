@@ -1,7 +1,9 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Html exposing (Html, text, div, h1, img, ul, li, input)
+import Html.Attributes exposing (src, type_, value)
+import Html.Events exposing (onClick)
+import Random
 
 
 ---- MODEL ----
@@ -15,22 +17,47 @@ type alias Agi =
     Int
 
 
+type alias Dice =
+    Int
+
+
+type alias DPoint =
+    Int
+
+
+type Character
+    = Player
+    | Enemy
+
+
+type alias Damage =
+    { minDamage : DPoint, maxDamage : DPoint }
+
+
 type alias PlayerStatus =
     { level : Int, hp : Int, mp : Int, maxHp : Int, maxMp : Int, str : Str, agi : Agi }
 
 
-type alias EnemtyStatus =
+type alias EnemyStatus =
     { hp : Int, maxHp : Int, str : Str, agi : Agi }
 
 
 type alias Model =
-    { playerStatus : PlayerStatus, enemtyStatus : EnemtyStatus }
+    { playerStatus : PlayerStatus
+    , enemyStatus : EnemyStatus
+    , currentPlayerDamage : DPoint
+    , currentEnemtyDamage : DPoint
+    , preemptiveCharacter : Character
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { playerStatus = level1
-      , enemtyStatus = slime
+      , enemyStatus = slime
+      , currentPlayerDamage = 0
+      , currentEnemtyDamage = 0
+      , preemptiveCharacter = Player
       }
     , Cmd.none
     )
@@ -41,12 +68,69 @@ init =
 
 
 type Msg
-    = NoOp
+    = Attack
+    | NewDamage Dice Dice DPoint DPoint
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    ( model, Cmd.none )
+update msg ({ playerStatus, enemyStatus } as model) =
+    case msg of
+        Attack ->
+            let
+                pDamage =
+                    calcAttackDamage playerStatus.str enemyStatus.agi
+
+                eDamage =
+                    calcAttackDamage enemyStatus.str playerStatus.agi
+
+                randomDamages =
+                    Random.map4
+                        (,,,)
+                        dice100
+                        dice32
+                        (Random.int pDamage.minDamage pDamage.maxDamage)
+                        (Random.int eDamage.minDamage eDamage.maxDamage)
+            in
+                model ! [ Random.generate (\( d100, d32, pd, ed ) -> NewDamage d100 d32 pd ed) randomDamages ]
+
+        NewDamage d100 d32 pDamage eDamage ->
+            let
+                preemptiveCharacter =
+                    if d100 < floor (calcPreemptiveStrike playerStatus.agi enemyStatus.agi * 100) then
+                        Player
+                    else
+                        Enemy
+
+                currentPlayerDamage =
+                    if d32 == 1 then
+                        0
+                    else
+                        pDamage
+
+                updatedPlayerStatus =
+                    { playerStatus | hp = playerStatus.hp - eDamage }
+
+                updatedEnemyStatus =
+                    { enemyStatus | hp = enemyStatus.hp - currentPlayerDamage }
+            in
+                { model
+                    | playerStatus = updatedPlayerStatus
+                    , enemyStatus = updatedEnemyStatus
+                    , currentPlayerDamage = currentPlayerDamage
+                    , currentEnemtyDamage = eDamage
+                    , preemptiveCharacter = preemptiveCharacter
+                }
+                    ! []
+
+
+dice32 : Random.Generator Dice
+dice32 =
+    Random.int 1 32
+
+
+dice100 : Random.Generator Dice
+dice100 =
+    Random.int 1 100
 
 
 
@@ -54,10 +138,27 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model =
+view { playerStatus, enemyStatus } =
     div []
-        [ img [ src "./src/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
+        [ input [ type_ "button", value "attack", onClick Attack ] []
+        , playerStatusView playerStatus
+        , enemyStatusView enemyStatus
+        ]
+
+
+playerStatusView : PlayerStatus -> Html Msg
+playerStatusView { level, hp, mp } =
+    ul []
+        [ li [] [ text <| toString level ]
+        , li [] [ text <| toString hp ]
+        , li [] [ text <| toString mp ]
+        ]
+
+
+enemyStatusView : EnemyStatus -> Html Msg
+enemyStatusView { hp } =
+    ul []
+        [ li [] [ text <| toString hp ]
         ]
 
 
@@ -76,9 +177,9 @@ calcPreemptiveStrike pAgi eAgi =
 {-| ダメージ計算(与・被)
 return: (最小ダメージ, 最大ダメージ)
 -}
-calcAttackDamage : Str -> Agi -> ( Int, Int )
-calcAttackDamage pStr eAgi =
-    ( pStr - (eAgi // 2) % 4, pStr - (eAgi // 2) % 2 )
+calcAttackDamage : Str -> Agi -> Damage
+calcAttackDamage str agi =
+    Damage (str - (agi // 2) % 4) (str - (agi // 2) % 2)
 
 
 
@@ -90,9 +191,9 @@ level1 =
     PlayerStatus 1 16 0 16 0 4 4
 
 
-slime : EnemtyStatus
+slime : EnemyStatus
 slime =
-    EnemtyStatus 3 3 5 6
+    EnemyStatus 3 3 5 6
 
 
 
