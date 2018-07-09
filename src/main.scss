@@ -1,5 +1,119 @@
-$main-padding: 20px;
+$border_default: 5px solid white;
 
-#main {
-    padding: $main-padding;
+body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  // background-image: radial-gradient(silver 7%, transparent 0), radial-gradient(silver 7%, transparent 0);
+  // background-position: 0 0, 10px 10px;
+  background-size: 10px 10px;
+  color: white;
+}
+#container {
+  margin: 0 auto;
+  width: 800px;
+  height: 800px;
+  border: 3px solid white;
+  border-radius: 10px;
+  padding: 16px;
+}
+.header {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+
+  > .command {
+      padding: 15px;
+      height: 55px;
+      border: $border_default;
+      border-radius: 10px;
+    > span {
+      font-size: 20px;
+      color: white;
+      background-color: black;
+      position: absolute;
+      top: -15px;
+      margin-left: 50px;
+    }
+    > div {
+      > a {
+        padding-left: 10px;
+        display: inline-block;
+        width: 100px;
+        position: relative;
+
+        &::selection {
+          background-color: #000000;
+        }
+
+        &:hover {
+          cursor: pointer;
+          &:before {
+            color: gray;
+            border: 7px solid transparent;
+            border-top-width: 5px;
+            border-bottom-width: 5px;
+            border-left-color: #fff;
+            width: 0;
+            height: 0;
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 7px;
+          }
+        }
+      }
+
+      + div {
+        margin-top: 5px;
+      }
+    }
+  }
+}
+.status {
+  padding: 15px;
+  width: 110px;
+  border: 5px solid white;
+  border-radius: 10px;
+  position: relative;
+
+  > span {
+    font-size: 20px;
+    color: white;
+    background-color: black;
+    position: absolute;
+    top: -15px;
+    margin-left: 6px;
+  }
+
+  > .status-row {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+.monster {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid white;
+}
+.hoge {
+  display: flex;
+  justify-content: space-between;
+}
+.selection {
+  margin-top: 24px;
+  width: 250px;
+  height: 300px;
+  border-radius: 10px;
+  border: 1px solid white;
+}
+.enemy-life {
+  margin-top: 24px;
+  width: 400px;;
+  padding-left: 16px;
+  height: 200px;
+  border: 1px solid white;
+  border-radius: 10px;
 }

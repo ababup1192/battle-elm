@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, h1, img, ul, li, input)
-import Html.Attributes exposing (src, type_, value)
+import Html exposing (Html, text, div, h1, img, ul, li, input, span, a)
+import Html.Attributes exposing (src, type_, value, id, class)
 import Html.Events exposing (onClick)
 import Random
 
@@ -139,11 +139,55 @@ dice100 =
 
 view : Model -> Html Msg
 view { playerStatus, enemyStatus } =
-    div []
-        [ input [ type_ "button", value "attack", onClick Attack ] []
-        , playerStatusView playerStatus
-        , enemyStatusView enemyStatus
+    div [ id "container" ]
+        [ div [ class "header" ]
+            [ div [ class "status" ]
+                [ span []
+                    [ text "ステータス" ]
+                , div [ class "status-row" ]
+                    [ span [] [ text "レベル" ]
+                    , span [] [ text "30" ]
+                    ]
+                , div [ class "status-row" ]
+                    [ span [] [ text "HP" ]
+                    , span [] [ text <| toString playerStatus.hp ]
+                    ]
+                , div [ class "status-row" ]
+                    [ span [] [ text "MP" ]
+                    , span [] [ text "157" ]
+                    ]
+                ]
+            , div [ class "command" ]
+                [ span []
+                    [ text "コマンド" ]
+                , div []
+                    [ a [ onClick Attack ] [ text "たたかう" ]
+                    , a [] [ text "じゅもん" ]
+                    ]
+                , div []
+                    [ a [] [ text "にげる" ]
+                    , a [] [ text "どうぐ" ]
+                    ]
+                ]
+            ]
+        , div [ class "monster" ] []
+        , div [ class "hoge" ]
+            [ div [ class "selection" ]
+                []
+            , div [ class "enemy-life" ]
+                []
+            ]
         ]
+
+
+
+{-
+   div []
+       [ input [ type_ "button", value "attack", onClick Attack ] []
+       , playerStatusView playerStatus
+       , enemyStatusView enemyStatus
+       ]
+-}
 
 
 playerStatusView : PlayerStatus -> Html Msg
