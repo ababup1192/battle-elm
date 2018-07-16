@@ -176,11 +176,7 @@ view { playerStatus, enemyStatus } =
                 ]
             ]
         , div [ class "monster" ] []
-        , div [ class "messages" ]
-            [ div [ class "log" ]
-                [ p [] [ text "hogehoge" ]
-                ]
-            ]
+        , div [ class "messages" ] <| windowMessageView <| playerAttakckMessage "えにくす" "スライムベス" 10
         ]
 
 
