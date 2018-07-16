@@ -9,6 +9,15 @@ $base_bgcolor: #000000;
   border-left-color: $base_color;
 }
 
+@keyframes typing {
+  from { width: 0; opacity: 1; }
+  to { width: 100%; opacity: 1; }
+}
+
+@mixin animation-delay($time) {
+  animation-delay: calc(1.5s * (#{$time});
+}
+
 /**
  * reset
  */
@@ -125,7 +134,6 @@ body {
   z-index: -1;
   border: 5px solid $base_color;
   background: $base_bgcolor;
-  // background-image: url('./pukure.gif');
   background-size: cover;
 }
 .messages {
@@ -140,7 +148,40 @@ body {
   margin: 0 auto;
   bottom: 50px;
 
-  > .log {
+  > .player-message {
     padding: 12px;
+    > p {
+      display: inline-block;
+      width: 100%;
+      opacity: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 1.5s steps(30, end);
+      animation-fill-mode: forwards;
+
+      &.delay-1 {
+        @include animation-delay(0);
+      }
+
+      &.delay-2 {
+        @include animation-delay(1);
+      }
+
+      &.delay-3 {
+        @include animation-delay(2);
+      }
+
+      &.delay-4 {
+        @include animation-delay(3);
+      }
+
+      &.delay-5 {
+        @include animation-delay(4);
+      }
+
+      &.delay-6 {
+        @include animation-delay(5);
+      }
+    }
   }
 }

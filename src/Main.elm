@@ -199,17 +199,17 @@ enemyStatusView { hp } =
 windowMessageView : List WindowMessage -> List (Html Msg)
 windowMessageView windowMessages =
     let
-        spanList left right =
-            [ span [] [ text left ], span [] [ text right ] ]
+        spanList i left right =
+            [ p [ class <| "delay-" ++ toString (i + 1) ] [ text <| left ++ "  " ++ right ] ]
     in
-        List.map
-            (\winMsg ->
+        List.indexedMap
+            (\i winMsg ->
                 case winMsg of
                     PlayerMessage left right ->
-                        div [ class "player-message" ] <| spanList left right
+                        div [ class "player-message" ] <| spanList i left right
 
                     EnemyMessage left right ->
-                        div [ class "enemy-message" ] <| spanList left right
+                        div [ class "enemy-message" ] <| spanList i left right
             )
             windowMessages
 
