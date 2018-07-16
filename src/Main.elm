@@ -9,6 +9,11 @@ import Random
 ---- MODEL ----
 
 
+type WindowMessage
+    = PlayerMessage String String
+    | EnemyMessage String String
+
+
 type alias Str =
     Int
 
@@ -173,20 +178,10 @@ view { playerStatus, enemyStatus } =
         , div [ class "monster" ] []
         , div [ class "messages" ]
             [ div [ class "log" ]
-                [ p [] [text "test"]
+                [ p [] [ text "hogehoge" ]
                 ]
             ]
         ]
-
-
-
-{-
-   div []
-       [ input [ type_ "button", value "attack", onClick Attack ] []
-       , playerStatusView playerStatus
-       , enemyStatusView enemyStatus
-       ]
--}
 
 
 playerStatusView : PlayerStatus -> Html Msg
@@ -203,6 +198,24 @@ enemyStatusView { hp } =
     ul []
         [ li [] [ text <| toString hp ]
         ]
+
+
+windowMessageView : List WindowMessage -> List (Html Msg)
+windowMessageView windowMessages =
+    let
+        spanList left right =
+            [ span [] [ text left ], span [] [ text right ] ]
+    in
+        List.map
+            (\winMsg ->
+                case winMsg of
+                    PlayerMessage left right ->
+                        div [ class "player-message" ] <| spanList left right
+
+                    EnemyMessage left right ->
+                        div [ class "enemy-message" ] <| spanList left right
+            )
+            windowMessages
 
 
 
@@ -237,6 +250,39 @@ level1 =
 slime : EnemyStatus
 slime =
     EnemyStatus 3 3 5 6
+
+
+commandMessage : WindowMessage
+commandMessage =
+    PlayerMessage "コマンド？" ""
+
+
+encountMessage : String -> List WindowMessage
+encountMessage monsterName =
+    PlayerMessage (monsterName ++ "が") "あらわれた！"
+        :: [ commandMessage ]
+
+
+playerAttakckMessage : String -> String -> Int -> List WindowMessage
+playerAttakckMessage playerName monsterName damage =
+    [ PlayerMessage (playerName ++ "の") "こうげき！"
+    , PlayerMessage (monsterName ++ "に") (toString damage ++ "ポイントの")
+    , PlayerMessage "ダメージを" "あたえた！"
+    ]
+
+
+enemyAttakckMessage : String -> String -> Int -> List WindowMessage
+enemyAttakckMessage monsterName playerName damage =
+    [ EnemyMessage (monsterName ++ "の") "こうげき！"
+    , EnemyMessage (playerName ++ "は") (toString damage ++ "ポイントの")
+    , EnemyMessage "ダメージを" "うけた！"
+    , commandMessage
+    ]
+
+
+defeatMessage : String -> List WindowMessage
+defeatMessage monsterName =
+    [ PlayerMessage (monsterName ++ "を") "たおした！" ]
 
 
 

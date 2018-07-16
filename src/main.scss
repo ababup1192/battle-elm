@@ -48,7 +48,7 @@ body {
     border-radius: 10px;
     position: relative;
     background: $base_bgcolor;
-  
+
     > span {
       font-size: 24px;
       color: $base_color;
@@ -57,7 +57,7 @@ body {
       top: -15px;
       margin-left: 7px;
     }
-  
+
     > .status-row {
       display: flex;
       justify-content: space-between;
@@ -132,6 +132,7 @@ body {
   width: 500px;
   height: 250px;
   border: 5px solid $base_color;
+  border-radius: 10px;
   background: $base_bgcolor;
   position: absolute;
   left: 0;
