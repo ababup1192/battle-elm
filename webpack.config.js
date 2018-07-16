@@ -14,6 +14,12 @@ module.exports = {
                 loader: ['style-loader', 'css-loader', 'sass-loader'],
             },
             {
+                test:/\.(jpeg|jpg|png|gif)$/,
+                use: {
+                    loader: 'File-loader?name=[hash].[ext]',
+                }
+            },
+            {
                 test:    /\.elm$/,
                 loader: 'elm-webpack-loader',
                 options: {
