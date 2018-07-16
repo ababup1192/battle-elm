@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, h1, img, ul, li, input, span, a)
+import Html exposing (Html, text, div, h1, img, ul, li, input, span, a, p)
 import Html.Attributes exposing (src, type_, value, id, class)
 import Html.Events exposing (onClick)
 import Random
@@ -171,11 +171,10 @@ view { playerStatus, enemyStatus } =
                 ]
             ]
         , div [ class "monster" ] []
-        , div [ class "hoge" ]
-            [ div [ class "selection" ]
-                []
-            , div [ class "enemy-life" ]
-                []
+        , div [ class "messages" ]
+            [ div [ class "log" ]
+                [ p [] [text "test"]
+                ]
             ]
         ]
 
