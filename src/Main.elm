@@ -220,12 +220,16 @@ windowMessageView windowMessages windowMessageCount =
     in
         List.indexedMap
             (\i winMsg ->
-                case winMsg of
-                    PlayerMessage left right ->
-                        ( toString (i + windowMessageCount), div [ class "player-message" ] <| spanList i left right )
+                let
+                    id =
+                        toString (i + windowMessageCount)
+                in
+                    case winMsg of
+                        PlayerMessage left right ->
+                            ( id, div [ class "player-message" ] <| spanList i left right )
 
-                    EnemyMessage left right ->
-                        ( toString (i + windowMessageCount), div [ class "enemy-message" ] <| spanList i left right )
+                        EnemyMessage left right ->
+                            ( id, div [ class "enemy-message" ] <| spanList i left right )
             )
             windowMessages
 
