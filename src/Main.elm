@@ -4,6 +4,7 @@ import Html exposing (Html, text, div, h1, img, ul, li, input, span, a, p)
 import Html.Attributes exposing (src, type_, value, id, class)
 import Html.Events exposing (onClick)
 import Random
+import Html.Keyed as Keyed
 
 
 ---- MODEL ----
@@ -53,6 +54,8 @@ type alias Model =
     , currentPlayerDamage : DPoint
     , currentEnemtyDamage : DPoint
     , preemptiveCharacter : Character
+    , currentWindowMessages : List WindowMessage
+    , windowMessageCount : Int
     }
 
 
@@ -63,6 +66,8 @@ init =
       , currentPlayerDamage = 0
       , currentEnemtyDamage = 0
       , preemptiveCharacter = Player
+      , currentWindowMessages = encountMessage "スライムベス"
+      , windowMessageCount = 0
       }
     , Cmd.none
     )
@@ -75,11 +80,22 @@ init =
 type Msg
     = Attack
     | NewDamage Dice Dice DPoint DPoint
+    | NextMessage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ playerStatus, enemyStatus } as model) =
+update msg ({ playerStatus, enemyStatus, windowMessageCount } as model) =
     case msg of
+        NextMessage ->
+            let
+                nextMessage =
+                    playerAttakckMessage "えにくす" "スライムベス" 15
+
+                nextMessageCount =
+                    windowMessageCount + List.length nextMessage
+            in
+                { model | currentWindowMessages = nextMessage, windowMessageCount = nextMessageCount } ! []
+
         Attack ->
             let
                 pDamage =
@@ -143,7 +159,7 @@ dice100 =
 
 
 view : Model -> Html Msg
-view { playerStatus, enemyStatus } =
+view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount } =
     div [ id "container" ]
         [ div [ class "header" ]
             [ div [ class "status" ]
@@ -176,7 +192,7 @@ view { playerStatus, enemyStatus } =
                 ]
             ]
         , div [ class "monster" ] []
-        , div [ class "messages" ] <| windowMessageView <| playerAttakckMessage "えにくす" "スライムベス" 10
+        , Keyed.node "div" [ class "messages", onClick NextMessage ] <| windowMessageView currentWindowMessages windowMessageCount
         ]
 
 
@@ -196,8 +212,8 @@ enemyStatusView { hp } =
         ]
 
 
-windowMessageView : List WindowMessage -> List (Html Msg)
-windowMessageView windowMessages =
+windowMessageView : List WindowMessage -> Int -> List ( String, Html Msg )
+windowMessageView windowMessages windowMessageCount =
     let
         spanList i left right =
             [ p [ class <| "delay-" ++ toString (i + 1) ] [ text <| left ++ "  " ++ right ] ]
@@ -206,10 +222,10 @@ windowMessageView windowMessages =
             (\i winMsg ->
                 case winMsg of
                     PlayerMessage left right ->
-                        div [ class "player-message" ] <| spanList i left right
+                        ( toString (i + windowMessageCount), div [ class "player-message" ] <| spanList i left right )
 
                     EnemyMessage left right ->
-                        div [ class "enemy-message" ] <| spanList i left right
+                        ( toString (i + windowMessageCount), div [ class "enemy-message" ] <| spanList i left right )
             )
             windowMessages
 
