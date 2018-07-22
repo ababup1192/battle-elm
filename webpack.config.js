@@ -14,7 +14,7 @@ module.exports = {
                 loader: ['style-loader', 'css-loader', 'sass-loader'],
             },
             {
-                test:/\.(jpeg|jpg|png|gif)$/,
+                test:/\.(jpeg|jpg|png|gif|ttf)$/,
                 use: {
                     loader: 'File-loader?name=[hash].[ext]',
                 }

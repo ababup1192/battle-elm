@@ -18,6 +18,11 @@ $base_bgcolor: #000000;
   animation-delay: calc(1.5s * (#{$time});
 }
 
+@font-face {
+  font-family: 'PixelMplus10-Regular';
+  src: url('./PixelMplus10-Regular.ttf');
+}
+
 /**
  * reset
  */
@@ -32,6 +37,7 @@ body {
   background: $base_bgcolor;
   background-size: 10px 10px;
   color: $base_color;
+  font-family: PixelMplus10-Regular;
 }
 #container {
   margin: 50px auto;
