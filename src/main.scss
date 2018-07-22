@@ -135,6 +135,14 @@ body {
   border: 5px solid $base_color;
   background: $base_bgcolor;
   background-size: cover;
+
+  > .yagi {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+    margin-top: 40px;
+    background-image: url('./yagi.png');
+  }
 }
 .messages {
   width: 500px;

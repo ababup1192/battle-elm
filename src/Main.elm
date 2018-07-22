@@ -61,7 +61,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { playerStatus = level1
       , enemyStatus = slime
-      , currentWindowMessages = encountMessage "スライムベス"
+      , currentWindowMessages = encountMessage "おやじヤギ"
       , windowMessageCount = 0
       , playableCharacter = Player
       }
@@ -121,7 +121,7 @@ update msg ({ playerStatus, enemyStatus, windowMessageCount } as model) =
                     { enemyStatus | hp = enemyStatus.hp - damagePoint }
 
                 nextMessage =
-                    playerAttakckMessage "えにくす" "スライムベス" pDamage
+                    playerAttakckMessage "えるむ" "おやじヤギ" pDamage
             in
                 { model
                     | enemyStatus = updatedEnemyStatus
@@ -143,7 +143,7 @@ update msg ({ playerStatus, enemyStatus, windowMessageCount } as model) =
                     { playerStatus | hp = playerStatus.hp - damagePoint }
 
                 nextMessage =
-                    enemyAttakckMessage "スライムベス" "えにくす" eDamage
+                    enemyAttakckMessage "おやじヤギ" "えるむ" eDamage
             in
                 { model
                     | playerStatus = updatedPlayerStatus
@@ -198,7 +198,9 @@ view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount, pla
                     ]
                 ]
             ]
-        , div [ class "monster" ] []
+        , div [ class "monster" ]
+            [ div [ class "yagi" ] []
+            ]
         , windowMessageView playableCharacter currentWindowMessages windowMessageCount
         ]
 
