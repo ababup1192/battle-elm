@@ -147,11 +147,52 @@ body {
   right: 0;
   margin: 0 auto;
   bottom: 50px;
-  cursor: pointer;
+
+  &.clickable {
+    cursor: pointer;
+  }
 
   > .player-message {
     padding: 12px;
     > p {
+      display: inline-block;
+      width: 100%;
+      opacity: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 1.5s steps(30, end);
+      animation-fill-mode: forwards;
+
+      &.delay-1 {
+        @include animation-delay(0);
+      }
+
+      &.delay-2 {
+        @include animation-delay(1);
+      }
+
+      &.delay-3 {
+        @include animation-delay(2);
+      }
+
+      &.delay-4 {
+        @include animation-delay(3);
+      }
+
+      &.delay-5 {
+        @include animation-delay(4);
+      }
+
+      &.delay-6 {
+        @include animation-delay(5);
+      }
+    }
+  }
+
+  > .enemy-message {
+    padding: 12px;
+    > p {
+      padding-left: 50px;
       display: inline-block;
       width: 100%;
       opacity: 0;

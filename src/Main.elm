@@ -51,11 +51,9 @@ type alias EnemyStatus =
 type alias Model =
     { playerStatus : PlayerStatus
     , enemyStatus : EnemyStatus
-    , currentPlayerDamage : DPoint
-    , currentEnemtyDamage : DPoint
-    , preemptiveCharacter : Character
     , currentWindowMessages : List WindowMessage
     , windowMessageCount : Int
+    , playableCharacter : Character
     }
 
 
@@ -63,11 +61,9 @@ init : ( Model, Cmd Msg )
 init =
     ( { playerStatus = level1
       , enemyStatus = slime
-      , currentPlayerDamage = 0
-      , currentEnemtyDamage = 0
-      , preemptiveCharacter = Player
       , currentWindowMessages = encountMessage "スライムベス"
       , windowMessageCount = 0
+      , playableCharacter = Player
       }
     , Cmd.none
     )
@@ -78,68 +74,82 @@ init =
 
 
 type Msg
-    = Attack
-    | NewDamage Dice Dice DPoint DPoint
-    | NextMessage
+    = PlayerDiceRole
+    | EnemyDiceRole
+    | PlayerAttack Dice DPoint
+    | EnemyAttack Dice DPoint
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ playerStatus, enemyStatus, windowMessageCount } as model) =
     case msg of
-        NextMessage ->
-            let
-                nextMessage =
-                    playerAttakckMessage "えにくす" "スライムベス" 15
-
-                nextMessageCount =
-                    windowMessageCount + List.length nextMessage
-            in
-                { model | currentWindowMessages = nextMessage, windowMessageCount = nextMessageCount } ! []
-
-        Attack ->
+        PlayerDiceRole ->
             let
                 pDamage =
                     calcAttackDamage playerStatus.str enemyStatus.agi
 
+                randomDamages =
+                    Random.map2
+                        (,)
+                        dice32
+                        (Random.int pDamage.minDamage pDamage.maxDamage)
+            in
+                model ! [ Random.generate (\( d32, pd ) -> PlayerAttack d32 pd) randomDamages ]
+
+        EnemyDiceRole ->
+            let
                 eDamage =
                     calcAttackDamage enemyStatus.str playerStatus.agi
 
                 randomDamages =
-                    Random.map4
-                        (,,,)
-                        dice100
+                    Random.map2
+                        (,)
                         dice32
-                        (Random.int pDamage.minDamage pDamage.maxDamage)
                         (Random.int eDamage.minDamage eDamage.maxDamage)
             in
-                model ! [ Random.generate (\( d100, d32, pd, ed ) -> NewDamage d100 d32 pd ed) randomDamages ]
+                model ! [ Random.generate (\( d32, ed ) -> EnemyAttack d32 ed) randomDamages ]
 
-        NewDamage d100 d32 pDamage eDamage ->
+        PlayerAttack d32 pDamage ->
             let
-                preemptiveCharacter =
-                    if d100 < floor (calcPreemptiveStrike playerStatus.agi enemyStatus.agi * 100) then
-                        Player
-                    else
-                        Enemy
-
-                currentPlayerDamage =
+                damagePoint =
                     if d32 == 1 then
                         0
                     else
                         pDamage
 
-                updatedPlayerStatus =
-                    { playerStatus | hp = playerStatus.hp - eDamage }
-
                 updatedEnemyStatus =
-                    { enemyStatus | hp = enemyStatus.hp - currentPlayerDamage }
+                    { enemyStatus | hp = enemyStatus.hp - damagePoint }
+
+                nextMessage =
+                    playerAttakckMessage "えにくす" "スライムベス" pDamage
+            in
+                { model
+                    | enemyStatus = updatedEnemyStatus
+                    , playableCharacter = Enemy
+                    , currentWindowMessages = nextMessage
+                    , windowMessageCount = windowMessageCount + List.length nextMessage
+                }
+                    ! []
+
+        EnemyAttack d32 eDamage ->
+            let
+                damagePoint =
+                    if d32 == 1 then
+                        0
+                    else
+                        eDamage
+
+                updatedPlayerStatus =
+                    { playerStatus | hp = playerStatus.hp - damagePoint }
+
+                nextMessage =
+                    enemyAttakckMessage "スライムベス" "えにくす" eDamage
             in
                 { model
                     | playerStatus = updatedPlayerStatus
-                    , enemyStatus = updatedEnemyStatus
-                    , currentPlayerDamage = currentPlayerDamage
-                    , currentEnemtyDamage = eDamage
-                    , preemptiveCharacter = preemptiveCharacter
+                    , playableCharacter = Player
+                    , currentWindowMessages = nextMessage
+                    , windowMessageCount = windowMessageCount + List.length nextMessage
                 }
                     ! []
 
@@ -159,7 +169,7 @@ dice100 =
 
 
 view : Model -> Html Msg
-view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount } =
+view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount, playableCharacter } =
     div [ id "container" ]
         [ div [ class "header" ]
             [ div [ class "status" ]
@@ -181,10 +191,7 @@ view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount } =
             , div [ class "command" ]
                 [ span []
                     [ text "コマンド" ]
-                , div []
-                    [ a [ onClick Attack ] [ text "たたかう" ]
-                    , a [] [ text "じゅもん" ]
-                    ]
+                , attackCommandView playableCharacter
                 , div []
                     [ a [] [ text "にげる" ]
                     , a [] [ text "どうぐ" ]
@@ -192,8 +199,35 @@ view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount } =
                 ]
             ]
         , div [ class "monster" ] []
-        , Keyed.node "div" [ class "messages", onClick NextMessage ] <| windowMessageView currentWindowMessages windowMessageCount
+        , windowMessageView playableCharacter currentWindowMessages windowMessageCount
         ]
+
+
+attackCommandView : Character -> Html Msg
+attackCommandView playableCharacter =
+    let
+        attack =
+            case playableCharacter of
+                Player ->
+                    a [ onClick PlayerDiceRole ] [ text "たたかう" ]
+
+                Enemy ->
+                    a [ onClick EnemyDiceRole ] [ text "たたかう" ]
+    in
+        div []
+            [ attack
+            , a [] [ text "じゅもん" ]
+            ]
+
+
+windowMessageView : Character -> List WindowMessage -> Int -> Html Msg
+windowMessageView character windowMessages windowMessageCount =
+    case character of
+        Player ->
+            Keyed.node "div" [ class "messages" ] <| messageListView windowMessages windowMessageCount
+
+        Enemy ->
+            Keyed.node "div" [ class "messages clickable", onClick EnemyDiceRole ] <| messageListView windowMessages windowMessageCount
 
 
 playerStatusView : PlayerStatus -> Html Msg
@@ -212,10 +246,10 @@ enemyStatusView { hp } =
         ]
 
 
-windowMessageView : List WindowMessage -> Int -> List ( String, Html Msg )
-windowMessageView windowMessages windowMessageCount =
+messageListView : List WindowMessage -> Int -> List ( String, Html Msg )
+messageListView windowMessages windowMessageCount =
     let
-        spanList i left right =
+        pList i left right =
             [ p [ class <| "delay-" ++ toString (i + 1) ] [ text <| left ++ "  " ++ right ] ]
     in
         List.indexedMap
@@ -226,10 +260,10 @@ windowMessageView windowMessages windowMessageCount =
                 in
                     case winMsg of
                         PlayerMessage left right ->
-                            ( id, div [ class "player-message" ] <| spanList i left right )
+                            ( id, div [ class "player-message" ] <| pList i left right )
 
                         EnemyMessage left right ->
-                            ( id, div [ class "enemy-message" ] <| spanList i left right )
+                            ( id, div [ class "enemy-message" ] <| pList i left right )
             )
             windowMessages
 
