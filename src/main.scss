@@ -1,6 +1,10 @@
 $border_default: 5px solid white;
 $base_color: #FFFFFF;
 $base_bgcolor: #000000;
+$base_fntsize: 24px;
+$window_size: 800px;
+$monster_window_size: 350px;
+$message_window_size: 500px;
 
 @mixin selected_command {
   border: 10px solid transparent;
@@ -12,6 +16,19 @@ $base_bgcolor: #000000;
 @keyframes typing {
   from { width: 0; opacity: 1; }
   to { width: 100%; opacity: 1; }
+}
+
+@keyframes damaged-anim {
+  from { background-image: linear-gradient(rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.2)), url('./yagi.png'); }
+  to { background-image:url('./yagi.png'); }
+}
+
+@keyframes quake {
+    0% {transform: translate(0px, 0px) rotateZ(0deg)}
+    25% {transform: translate(10px, 0px) rotateZ(-1deg)}
+    50% {transform: translate(0px, 0px) rotateZ(0deg)}
+    75% {transform: translate(10px, 0px) rotateZ(1deg)}
+    100% {transform: translate(0px, 0px) rotateZ(0deg)}
 }
 
 @mixin animation-delay($time) {
@@ -41,14 +58,19 @@ body {
 }
 #container {
   margin: 50px auto;
-  width: 800px;
-  height: 800px;
+  width: $window_size;
+  height: $window_size;
   border: 1px solid $base_color;
   border-radius: 10px;
   padding: 16px;
   position: absolute;
   background-image: url('./field-image.png');
   background-size: cover;
+
+  &.earthquake {
+    display: inline-block;
+    animation: quake .1s 5;
+  }
 }
 .header {
   display: flex;
@@ -65,7 +87,7 @@ body {
     background: $base_bgcolor;
 
     > span {
-      font-size: 24px;
+      font-size: $base_fntsize;
       color: $base_color;
       background-color: $base_bgcolor;
       position: absolute;
@@ -79,7 +101,7 @@ body {
       padding-top: 8px;
 
       > span {
-        font-size: 24px;
+        font-size: $base_fntsize;
       }
     }
   }
@@ -93,7 +115,7 @@ body {
       background: $base_bgcolor;
 
     > span {
-      font-size: 24px;
+      font-size: $base_fntsize;
       color: $base_color;
       background-color: $base_bgcolor;
       position: absolute;
@@ -102,7 +124,7 @@ body {
     }
     > div {
       > a {
-        font-size: 24px;
+        font-size: $base_fntsize;
         padding-left: 10px;
         display: inline-block;
         width: 140px;
@@ -133,9 +155,10 @@ body {
     }
   }
 }
+
 .monster {
-  width: 350px;
-  height: 350px;
+  width: $monster_window_size;
+  height: $monster_window_size;
   margin: 0 auto;
   z-index: -1;
   border: 5px solid $base_color;
@@ -146,13 +169,17 @@ body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
-    background-image: url('./yagi.png');
     background-size: cover;
+    background-image: url('./yagi.png');
+
+    &.damaged {
+      animation: damaged-anim .1s ease-in-out 5 alternate;
+    }
   }
 }
 .messages {
-  width: 500px;
-  height: 250px;
+  width: $message_window_size;
+  height: calc($message_window_size / 2);
   border: 5px solid $base_color;
   border-radius: 10px;
   background: $base_bgcolor;

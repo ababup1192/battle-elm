@@ -170,7 +170,14 @@ dice100 =
 
 view : Model -> Html Msg
 view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount, playableCharacter } =
-    div [ id "container" ]
+    div
+        [ id "container"
+        , class <|
+            if playableCharacter == Player then
+                "earthquake"
+            else
+                ""
+        ]
         [ div [ class "header" ]
             [ div [ class "status" ]
                 [ span []
@@ -199,7 +206,15 @@ view { playerStatus, enemyStatus, currentWindowMessages, windowMessageCount, pla
                 ]
             ]
         , div [ class "monster" ]
-            [ div [ class "yagi" ] []
+            [ div
+                [ class <|
+                    "yagi"
+                        ++ if playableCharacter == Enemy then
+                            " damaged"
+                           else
+                            ""
+                ]
+                []
             ]
         , windowMessageView playableCharacter currentWindowMessages windowMessageCount
         ]
